@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Health Assistant Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f7f6;
+        }
+
+        .chat-container {
+            background-color: #fff;
+            border-radius: 10px;
+            width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 500px;
+        }
+
+        .chat-box {
+            overflow-y: auto;
+            flex-grow: 1;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            height: 350px;
+        }
+
+        input {
+            padding: 10px;
+            font-size: 14px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .user-message {
+            background-color: #DCF8C6;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            max-width: 70%;
+        }
+
+        .bot-message {
+            background-color: #e2e2e2;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            max-width: 70%;
+            align-self: flex-end;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-box" id="chatBox"></div>
+        <input type="text" id="userInput" placeholder="Enter your health issue (e.g., 'I have a cold')" />
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        const healthDatabase = {
+            diabetes: {
+                foods: ["whole grains", "vegetables", "legumes", "lean proteins", "nuts"],
+                tips: [
+                    "Monitor your blood sugar regularly.",
+                    "Limit sugary foods and beverages.",
+                    "Stay physically active daily."
+                ]
+            },
+            hypertension: {
+                foods: ["low-sodium foods", "leafy greens", "bananas", "beets", "garlic"],
+                tips: [
+                    "Reduce salt intake.",
+                    "Manage stress through meditation or yoga.",
+                    "Exercise regularly."
+                ]
+            },
+            cancer: {
+                foods: ["fruits and vegetables", "whole grains", "lean proteins", "turmeric", "garlic", "green tea"],
+                tips: [
+                    "Maintain a healthy weight.",
+                    "Exercise regularly.",
+                    "Limit alcohol consumption.",
+                    "Consult with your oncologist for treatment plans."
+                ]
+            },
+            heart_disease: {
+                foods: ["omega-3 fatty acids", "fiber-rich foods", "vegetables", "lean proteins"],
+                tips: [
+                    "Maintain a healthy weight.",
+                    "Exercise regularly.",
+                    "Limit saturated fat and cholesterol intake."
+                ]
+            },
+            asthma: {
+                foods: ["antioxidant-rich fruits", "omega-3 fatty acids", "magnesium-rich foods"],
+                tips: [
+                    "Avoid allergens and irritants.",
+                    "Use an inhaler as prescribed.",
+                    "Stay away from smoke and pollution."
+                ]
+            },
+            arthritis: {
+                foods: ["omega-3 fatty acids", "ginger", "turmeric", "vitamin D-rich foods"],
+                tips: [
+                    "Maintain a healthy weight to reduce joint strain.",
+                    "Stay active with low-impact exercises.",
+                    "Consider physical therapy for joint mobility."
+                ]
+            },
+            depression: {
+                foods: ["omega-3 fatty acids", "whole grains", "fruits and vegetables"],
+                tips: [
+                    "Practice mindfulness and stress-reducing techniques.",
+                    "Maintain a healthy diet with balanced nutrients.",
+                    "Seek professional counseling or therapy."
+                ]
+            },
+            migraine: {
+                foods: ["omega-3 fatty acids", "magnesium-rich foods", "leafy greens"],
+                tips: [
+                    "Maintain a regular sleep schedule.",
+                    "Avoid triggers like caffeine, alcohol, and stress.",
+                    "Consider stress-reducing techniques like meditation."
+                ]
+            },
+            osteoporosis: {
+                foods: ["calcium-rich foods", "vitamin D-rich foods", "leafy greens", "dairy products"],
+                tips: [
+                    "Engage in weight-bearing exercises.",
+                    "Ensure sufficient calcium and vitamin D intake.",
+                    "Avoid smoking and limit alcohol consumption."
+                ]
+            },
+            flu: {
+                foods: ["hot soups", "ginger tea", "vitamin C-rich foods", "chicken broth"],
+                tips: [
+                    "Stay hydrated and rest.",
+                    "Use over-the-counter medications for symptom relief.",
+                    "Consult a doctor if symptoms worsen."
+                ]
+            },
+            covid_19: {
+                foods: ["hydrating fluids", "immune-boosting foods like citrus fruits", "hot teas"],
+                tips: [
+                    "Stay isolated to prevent spreading the virus.",
+                    "Rest and hydrate well.",
+                    "Consult a healthcare professional if you experience severe symptoms."
+                ]
+            },
+            acne: {
+                foods: ["omega-3 fatty acids", "whole grains", "green tea", "vitamin A-rich foods"],
+                tips: [
+                    "Avoid sugary and greasy foods.",
+                    "Drink plenty of water to keep skin hydrated.",
+                    "Use non-comedogenic skin products.",
+                    "Cleanse your skin regularly with gentle products."
+                ]
+            },
+            eczema: {
+                foods: ["omega-3 fatty acids", "probiotic-rich foods", "vitamin E-rich foods", "leafy greens"],
+                tips: [
+                    "Moisturize skin frequently.",
+                    "Avoid triggers like hot water, harsh soaps, and allergens.",
+                    "Manage stress, which can worsen symptoms.",
+                    "Wear soft, breathable fabrics."
+                ]
+            },
+            psoriasis: {
+                foods: ["omega-3 fatty acids", "antioxidant-rich foods", "leafy greens", "vitamin D-rich foods"],
+                tips: [
+                    "Avoid alcohol and smoking.",
+                    "Use soothing lotions and moisturizers.",
+                    "Manage stress with relaxation techniques.",
+                    "Consult a dermatologist for prescribed treatments."
+                ]
+            },
+            rosacea: {
+                foods: ["omega-3 fatty acids", "vitamin C-rich foods", "green tea", "anti-inflammatory foods"],
+                tips: [
+                    "Avoid triggers like spicy foods and alcohol.",
+                    "Use gentle, non-irritating skin products.",
+                    "Protect your skin from the sun with SPF.",
+                    "Consider using prescribed topical treatments."
+                ]
+            },
+            dermatitis: {
+                foods: ["omega-3 fatty acids", "vitamin E-rich foods", "probiotic-rich foods"],
+                tips: [
+                    "Avoid scratching or irritating the skin.",
+                    "Moisturize skin regularly.",
+                    "Use mild, unscented skin care products.",
+                    "Avoid triggers like allergens and certain fabrics."
+                ]
+            },
+            kidney_disease: {
+                foods: ["low-sodium foods", "omega-3 fatty acids", "fresh fruits and vegetables", "whole grains"],
+                tips: [
+                    "Avoid high-sodium foods.",
+                    "Stay hydrated and monitor kidney function regularly.",
+                    "Follow your doctor’s advice on medications and treatment plans."
+                ]
+            },
+            liver_disease: {
+                foods: ["vitamin C-rich foods", "antioxidant-rich foods", "whole grains", "leafy greens"],
+                tips: [
+                    "Avoid alcohol consumption.",
+                    "Maintain a healthy weight and avoid fatty foods.",
+                    "Follow prescribed medications and monitor liver function."
+                ]
+            },
+            thyroid_disorder: {
+                foods: ["iodine-rich foods", "selenium-rich foods", "vitamin D-rich foods"],
+                tips: [
+                    "Avoid excessive intake of goitrogenic foods like soy.",
+                    "Maintain regular thyroid hormone levels with prescribed medication.",
+                    "Exercise regularly and manage stress."
+                ]
+            },
+            gastrointestinal_disease: {
+                foods: ["fiber-rich foods", "probiotic-rich foods", "lean proteins", "hydrating fluids"],
+                tips: [
+                    "Avoid spicy and acidic foods.",
+                    "Stay hydrated and eat smaller meals throughout the day.",
+                    "Manage stress as it can affect digestion."
+                ]
+            },
+            neurological_disorders: {
+                foods: ["omega-3 fatty acids", "vitamin B-rich foods", "dark chocolate", "green tea"],
+                tips: [
+                    "Engage in mental exercises like puzzles and reading.",
+                    "Stay physically active to maintain neurological health.",
+                    "Consult a neurologist for treatment plans."
+                ]
+            },
+            cold: {
+                foods: ["vitamin C-rich foods", "hot soup", "honey and lemon tea"],
+                tips: [
+                    "Rest and drink plenty of fluids.",
+                    "Use a humidifier to ease congestion.",
+                    "Avoid close contact with others to prevent spreading the virus."
+                ]
+            },
+            headache: {
+                foods: ["magnesium-rich foods", "water, fruits with high water content"],
+                tips: [
+                    "Stay hydrated and avoid triggers like caffeine and alcohol.",
+                    "Rest in a quiet, dark room if you have a migraine.",
+                    "Consider relaxation techniques like deep breathing or yoga."
+                ]
+            },
+            indigestion: {
+                foods: ["ginger tea", "bananas", "oatmeal", "papaya"],
+                tips: [
+                    "Eat smaller meals and avoid heavy, greasy foods.",
+                    "Avoid lying down right after eating.",
+                    "Consider probiotics to improve gut health."
+                ]
+            },
+            fever: {
+                foods: ["hydrating fluids", "hot tea", "citrus fruits"],
+                tips: [
+                    "Rest and stay hydrated.",
+                    "Take fever-reducing medication as prescribed by a doctor.",
+                    "Monitor your temperature and seek medical help if it gets too high."
+                ]
+            },
+            cough: {
+                foods: ["honey and lemon tea", "hot water with ginger"],
+                tips: [
+                    "Stay hydrated and use a humidifier.",
+                    "Avoid smoking or exposure to secondhand smoke.",
+                    "Consider using over-the-counter cough syrups as needed."
+                ]
+            }
+        };
+
+        // General health tips
+        const generalHealthTips = {
+            foods: ["fruits", "vegetables", "lean proteins", "whole grains", "nuts", "seeds"],
+            tips: [
+                "Drink plenty of water throughout the day.",
+                "Exercise regularly and maintain a healthy weight.",
+                "Get 7-8 hours of sleep every night.",
+                "Manage stress through activities like yoga or meditation.",
+                "Avoid smoking and limit alcohol consumption."
+            ]
+        };
+
+        // Send message when button is clicked or Enter key is pressed
+        function sendMessage() {
+            const userInput = document.getElementById('userInput').value.toLowerCase();
+           
